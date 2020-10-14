@@ -69,3 +69,9 @@ shopping:
   - shops
   - retail
   default_sqm: 200
+  
+#place_of_worship:
+ # index: 7
+  #labels:
+  #- place_of_worship
+  #default_sqm: 1600

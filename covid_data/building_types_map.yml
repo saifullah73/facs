@@ -44,11 +44,9 @@ leisure:
   - soft_play
   - mosque
   - church
-  - chapel
   - temple
   - synagogue
   - religious
-  - clubhouse
   - pavilion
   - stadium
   - library
@@ -63,15 +61,14 @@ shopping:
   - commercial
   - bank
   - mall
-  - pub
   - restaurant
   - shop
   - shops
   - retail
   default_sqm: 200
   
-#place_of_worship:
- # index: 7
-  #labels:
-  #- place_of_worship
-  #default_sqm: 1600
+place_of_worship:
+  index: 7
+  labels:
+  - place_of_worship
+  default_sqm: 1600

@@ -8,15 +8,15 @@ import csv
 import pandas as pd
 
 # TODO: store all this in a YaML file
-lids = {"park":0,"hospital":1,"supermarket":2,"office":3,"school":4,"leisure":5,"shopping":6} # location ids and labels
+lids = {"park":0,"hospital":1,"supermarket":2,"office":3,"school":4,"leisure":5,"shopping":6,"place_of_worship":7} # location ids and labels
 lnames = list(lids.keys())
-avg_visit_times = [90,60,60,360,360,60,60] #average time spent per visit
+avg_visit_times = [90,60,60,360,360,60,60,20] #average time spent per visit
 home_interaction_fraction = 0.2 # people are within 2m at home of a specific other person 20% of the time.
 
 class Needs():
   def __init__(self, csvfile):
     self.add_needs(csvfile)
-    self.household_isolation_multiplier = 1.0
+    self.household_isolation_multiplier = 1.0 #written by owais and saif, describes isolation of family memebers of infected person
     print("Needs created. Household isolation multiplier set to {}.".format(self.household_isolation_multiplier))
 
   def i(self, name):
@@ -42,10 +42,22 @@ class Needs():
               #print("NC:",needs_cols)
               
               needs_cols[lids[element]] = k
+          '''
+          this is the mapping established by the below code
+          locaction type (index in csv, index in needs array) 
+          school 1,4
+          office 2,3
+          shopping 3,6
+          supermarket 4,2
+          leisure 5,5
+          park 6,0
+          hospital 7,1
+          place_of_worship 8,7
+          '''
         else:
           for i in range(0,len(needs_cols)):
             self.needs[i,row_number-1] = int(row[needs_cols[i]])
-          self.needs[i,lids["school"]] = int(0.75*int(row[needs_cols[i]])) # assuming 25% of school time is outside of the building (PE or breaks)
+          self.needs[lids["school"], row_number - 1] = int(0.75 * int(row[needs_cols[lids["school"]]]))  # assuming 25% of school time is outside of the building (PE or breaks)
         row_number += 1
 
   def get_needs(self, person):
@@ -57,7 +69,7 @@ class Needs():
         n[lids["school"]]=0
       return n
     else:
-      return np.array([0,5040,0,0,0,0,0])
+      return np.array([0,5040,0,0,0,0,0,0]) #5040 minutes per week for hospitals.
 
 # Global storage for needs now, to keep it simple.
 needs = Needs("covid_data/needs.csv")
@@ -108,8 +120,7 @@ class Person():
     self.status = "susceptible" # states: susceptible, exposed, infectious, recovered, dead, immune.
     self.symptomatic = False # may be symptomatic if infectious
     self.status_change_time = -1
-
-    self.age = np.random.choice(91, p=ages) # age in years
+    self.age = np.random.choice(91, p=ages) # age in years p = probability
 
 
   def assign_group(self, location_type, num_groups):
@@ -271,6 +282,7 @@ class Household():
       if self.agents[i].status == "susceptible":
         if ic > 0:
           infection_chance = e.contact_rate_multiplier["house"] * disease.infection_rate * home_interaction_fraction * ic
+          '''Explaination: Household isolation multipler '''
           if needs.household_isolation_multiplier < 1.0:
             infection_chance *= 2.0 # interaction duration (and thereby infection chance) double when household isolation is incorporated (Imperial Report 9).
           if random.random() < infection_chance:
@@ -293,6 +305,7 @@ class House:
     #self.find_nearest_locations(e)
     #print("nearest locs:", self.nearest_locations)
     for i in range(0, num_households):
+        '''Explaination: Poisson'''
         size = 1 + np.random.poisson(e.household_size-1)
         e.num_agents += size
         self.households.append(Household(self, e.ages, size))
@@ -346,7 +359,7 @@ class House:
         self.households[hh].agents[p].infect(time, severity)
         infection_pending = False
 
-  def has_age(self, age):
+  def has_age(self, age): #does a person of age x exists in this house
     for hh in self.households:
       for a in hh.agents:
         if a.age == age:
@@ -404,12 +417,17 @@ class Location:
       visit_time *= e.self_isolation_multiplier # implementing case isolation (CI)
     elif person.household.is_infected(): # person is in household quarantine, but not subject to CI.
       visit_time *= needs.household_isolation_multiplier
-
+    '''
+    Explaination: Why some location types has need in terms of minutes per week
+    '''
     if person.hospitalised and self.type == "hospital":
       self.inf_visit_minutes += need/7 * e.hospital_protection_factor
       return
 
     if visit_time > 0.0:
+      '''
+      need is per day, and visit time is being multiplied by 7, why?
+      '''
       visit_probability = need/(visit_time * 7) # = minutes per week / (average visit time * days in the week)
       #if ultraverbose:
       #  print("visit prob = ", visit_probability)
@@ -509,6 +527,9 @@ class Ecosystem:
     self.loc_groups[loc_type] = {}
     # Assign groups to specific locations of that type in round robin fashion.
     for i in range(0, max_groups):
+      '''
+      Explaination: Why i%num_locs, wouldn't it ignore many locations and do not assign them a group
+      '''
       self.loc_groups[loc_type][i] = self.locations[loc_type][i % num_locs]
 
     # randomly assign agents to groups
@@ -773,7 +794,9 @@ class Ecosystem:
     self.self_isolation_multiplier=self.ci_multiplier * self.track_trace_multiplier
     self.print_isolation_rate("CI with multiplier {}".format(self.self_isolation_multiplier))
 
-
+  '''
+  Explaination: explain this function
+  '''
   def add_household_isolation(self, multiplier=0.625):
     # compulsory household isolation
     # assumption: 50% of household members complying
@@ -786,13 +809,13 @@ class Ecosystem:
     self.print_contact_rate("Household isolation with {} multiplier".format(multiplier))
 
 
-  def add_cum_column(elf, csv_file, cum_columns):
-    df = ps.read_csv(csv_file, index_col=None, header=0)
+  def add_cum_column(self, csv_file, cum_columns):
+    df = pd.read_csv(csv_file, index_col=None, header=0)
 
-    for columns in com_columns:
-      df['cum %s' % (column)] = df[column].sumsum()
+    for columns in cum_columns:
+      df['cum %s' % (columns)] = df[columns].sumsum()
 
-    df.to_csv(csvfile)
+    df.to_csv(csv_file)
 
 
   def find_hospital(self):

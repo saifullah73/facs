@@ -8,5 +8,6 @@ def read_age_csv(csv_name, header_name=""):
   if header_name not in df.columns:
     header_name = "islamabad"
   ages = df[header_name.lower()].to_numpy()
+  # return fractions instead of actual distribution
   return ages / np.sum(ages)
 

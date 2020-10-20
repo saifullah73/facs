@@ -11,6 +11,9 @@ def full_lockdown(e):
   e.add_case_isolation()
   e.add_household_isolation()
 
+'''
+Explaination: Define parameters
+'''
 def uk_lockdown(e, phase=1, transition_fraction=1.0, keyworker_fraction=0.18, track_trace_limit=0.5, compliance=0.0):
   """
   Code which reflects EXISTING UK lockdown measures.
@@ -28,6 +31,7 @@ def uk_lockdown(e, phase=1, transition_fraction=1.0, keyworker_fraction=0.18, tr
     # light work from home instruction, with ascending compliance to 60%.
     e.add_work_from_home(0.65*transition_fraction)
   if phase == 2: # Enacted March 23rd
+    '''Explaination! : What does exclude_people means?'''
     e.add_partial_closure("school", 1.0 - keyworker_fraction, exclude_people=True)
     e.add_closure("leisure", 0)
     e.add_partial_closure("shopping", 0.6 + (transition_fraction * 0.2))
@@ -166,7 +170,9 @@ def uk_lockdown_scenarios(e, t, step, vaccine=100, track_trace_multiplier = 0.5)
   e.add_case_isolation()
   e.add_household_isolation()
   """
-
+'''
+Explaination: Define function
+'''
 def uk_lockdown_existing(e, t, track_trace_limit=0.5):
   update_hospital_protection_factor_uk(e,t)
 

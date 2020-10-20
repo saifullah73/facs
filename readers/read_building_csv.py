@@ -22,6 +22,14 @@ def apply_building_mapping(mapdict, label):
       return category
   return "house"
 
+'''
+Change:Need to change household_size
+'''
+
+'''
+Explaination: This function generates its own offices. Why?
+'''
+
 def read_building_csv(e, csvfile, building_type_map="covid_data/building_types_map.yml", house_ratio=1, workspace=12, office_size=1600, household_size=2.6, households_per_house=1, work_participation_rate=0.5, dumptypesandquit=False):
   """
   house_ratio = number of households per house.

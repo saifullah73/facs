@@ -193,6 +193,7 @@ class Person():
       if random.random() < self.get_hospitalisation_chance(disease): 
         self.mild_version = False
         #self.phase_duration = np.random.poisson(disease.period_to_hospitalisation - disease.incubation_period)
+        '''Explaination!'''
         self.phase_duration = max(1, np.random.poisson(disease.period_to_hospitalisation) - self.phase_duration)
       else:
         self.mild_version = True
@@ -270,6 +271,7 @@ class Household():
     for i in range(0,self.size):
       if self.agents[i].status == "susceptible":
         if ic > 0:
+          '''Explaination!'''
           infection_chance = e.contact_rate_multiplier["house"] * disease.infection_rate * home_interaction_fraction * ic
           if needs.household_isolation_multiplier < 1.0:
             infection_chance *= 2.0 # interaction duration (and thereby infection chance) double when household isolation is incorporated (Imperial Report 9).
@@ -377,6 +379,7 @@ class Location:
     self.sqm = sqm # size in square meters.
 
     if loc_type == "park":
+      '''Explaination!: Is the size (in sqm) of park is increased by 10 so as to cater for secondary transmission in open environment?'''
       self.sqm *= 10 # https://www.medrxiv.org/content/10.1101/2020.02.28.20029272v2 (I took a factor of 10 instead of 19 due to the large error bars)
 
     self.visits = []
@@ -415,7 +418,7 @@ class Location:
       #  print("visit prob = ", visit_probability)
     else:
       return
-
+    '''Explaination! define deterministic'''
     if deterministic:
       self.visit_probability_counter += min(visit_probability, 1)
       if self.visit_probability_counter > 1.0:
@@ -431,7 +434,7 @@ class Location:
 
   def evolve(self, e, deterministic=False):
     minutes_opened = 12*60
-
+    '''Explaination! define base rate formula'''
     base_rate = e.contact_rate_multiplier[self.type] * (e.disease.infection_rate/360.0) * (1.0 / minutes_opened) * (self.inf_visit_minutes / self.sqm)
     # For Covid-19 this should be 0.07 (infection rate) for 1 infectious person, and 1 susceptible person within 2m for a full day.
     # I assume they can do this in a 4m^2 area.
@@ -535,7 +538,7 @@ class Ecosystem:
 
   def evolve_public_transport(self):
     num_agents = 0
-
+    '''Explaination! Why 20/900 ?'''
     base_rate = self.traffic_multiplier * self.disease.infection_rate * (20 / 900)
     if self.enforce_masks_on_transport:
       base_rate *= 0.44 # 56% reduction when masks are widely used: https://www.medrxiv.org/content/10.1101/2020.04.17.20069567v4.full.pdf
@@ -731,6 +734,7 @@ class Ecosystem:
     # Values are different for three location types.
     # Setting values as described in Table 2, Imp Report 9. ("SD")
     self.contact_rate_multiplier["office"] *= 0.75
+    '''Explaination! Why contact rate multiplier for school is still 1?'''
     self.contact_rate_multiplier["school"] *= 1.0
     self.contact_rate_multiplier["house"] *= 1.25
     self.print_contact_rate("SD (Imperial Report 9)")
@@ -750,6 +754,7 @@ class Ecosystem:
     dist_factor_tight = (0.5 / tight_distance)**2 # assuming people stay 1 meter apart in tight areas
     # 0.5 is seen as a rough border between intimate and interpersonal contact, 
     # based on proxemics (Edward T Hall).
+    '''Explaination! Where this -2 is written?'''
     # The -2 exponent is based on the observation that particles move linearly in
     # one dimension, and diffuse in the two other dimensions.
     # gravitational effects are ignored, as particles on surfaces could still
@@ -787,12 +792,12 @@ class Ecosystem:
 
 
   def add_cum_column(elf, csv_file, cum_columns):
-    df = ps.read_csv(csv_file, index_col=None, header=0)
+    df = pd.read_csv(csv_file, index_col=None, header=0)
 
-    for columns in com_columns:
-      df['cum %s' % (column)] = df[column].sumsum()
+    for columns in cum_columns:
+      df['cum %s' % (columns)] = df[columns].sumsum()
 
-    df.to_csv(csvfile)
+    df.to_csv(csv_file)
 
 
   def find_hospital(self):

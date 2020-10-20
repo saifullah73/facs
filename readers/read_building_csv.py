@@ -76,6 +76,7 @@ def read_building_csv(e, csvfile, building_type_map="covid_data/building_types_m
         if house_csv_count % house_ratio == 0:
           e.addHouse(num_houses, x , y, house_ratio*households_per_house)
           num_houses += 1
+          '''Explaination! Why is there office_sqm for houses? and how its value is derived?'''
           office_sqm += workspace*household_size*work_participation_rate*house_ratio*households_per_house # 10 sqm per worker, 2.6 person per household, 50% in workforce
         house_csv_count += 1
       else:

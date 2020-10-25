@@ -813,7 +813,7 @@ class Ecosystem:
     df = pd.read_csv(csv_file, index_col=None, header=0)
 
     for columns in cum_columns:
-      df['cum %s' % (columns)] = df[columns].sumsum()
+      df['cum %s' % (columns)] = df[columns].cumsum()
 
     df.to_csv(csv_file)
 

@@ -6,6 +6,7 @@ from readers import read_building_csv
 from readers import read_cases_csv
 from readers import read_disease_yml
 import sys
+import datetime
 
 from os import makedirs, path
 import argparse
@@ -17,7 +18,7 @@ if __name__ == "__main__":
 
     # Instantiate the parser
     parser = argparse.ArgumentParser()
-    parser.add_argument('--location', action="store", default="brent")
+    parser.add_argument('--location', action="store", default="islamabad")
     parser.add_argument('--transition_scenario', action="store", default="extend-lockdown")
     parser.add_argument('--transition_mode', action="store",
                         type=int, default='1')
@@ -94,7 +95,8 @@ if __name__ == "__main__":
 
     end_time = 180
     if transition_scenario in ["extend-lockdown","dynamic-lockdown","periodic-lockdown","uk-forecast"]:
-      end_time = 730
+        end_time = 227 #starting from 13th march till 26th Oct
+      # end_time = 730
 
     print("Running basic Covid-19 simulation kernel.")
     print("scenario = %s" % (location))
@@ -144,7 +146,7 @@ if __name__ == "__main__":
       e.add_infections(int(starting_num_infections/10), i-19)
 
     print("THIS SIMULATIONS HAS {} AGENTS.".format(e.num_agents))
-
+    begin_time = datetime.datetime.now()
     e.time = -20
     e.print_header(outfile)
     for i in range(0, 20):
@@ -202,3 +204,4 @@ if __name__ == "__main__":
     e.add_cum_column(outfile, ["dead", "num hospitalisations today", "infectious", "num infections today"])
 
     print("Simulation complete.", file=sys.stderr)
+    print("Time taken : "+ str(datetime.datetime.now()-begin_time) + "HH:MM:SS:milliseconds")

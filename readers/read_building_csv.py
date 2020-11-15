@@ -61,9 +61,10 @@ def read_building_csv(e, csvfile, building_type_map="covid_data/building_types_m
     ybound = [99999.0,-99999.0]
 
     for row in building_reader:
-      if row_number == 0:
-        row_number += 1
-        continue
+      # skipping header row
+      # if row_number == 0:
+      #   row_number += 1
+      #   continue
       x = float(row[1])
       y = float(row[2])
       xbound[0] = min(x,xbound[0])
@@ -101,10 +102,11 @@ def read_building_csv(e, csvfile, building_type_map="covid_data/building_types_m
       row_number += 1
       if row_number % 10000 == 0:
         print(row_number, "read", file=sys.stderr)
-    print(row_number, "read", file=sys.stderr)
+    print(row_number, " rows read", file=sys.stderr)
     print("bounds:", xbound, ybound, file=sys.stderr)
     office_sqm_red = office_sqm
-    
+
+    '''Explaination: Why generate your own offices'''
     f = open("offices.csv","w")
     while office_sqm_red > 0:
       num_locs += 1

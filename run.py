@@ -18,7 +18,7 @@ if __name__ == "__main__":
 
     # Instantiate the parser
     parser = argparse.ArgumentParser()
-    parser.add_argument('--location', action="store", default="islamabad")
+    parser.add_argument('--location', action="store", default="i8")
     parser.add_argument('--transition_scenario', action="store", default="extend-lockdown")
     parser.add_argument('--transition_mode', action="store",
                         type=int, default='1')

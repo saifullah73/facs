@@ -78,31 +78,36 @@ num_hospitalisations_today = 0
 num_deaths_today = 0
 num_recoveries_today = 0
 log_prefix = "."
+id=0
 
-def log_infection(t, x, y, loc_type):
+def log_infection(t,id, x, y, loc_type):
   global num_infections_today
   out_inf = open("{}/covid_out_infections.csv".format(log_prefix),'a')
-  print("{},{},{},{}".format(t, x, y, loc_type), file=out_inf)
+  print("{},{},{},{},{}".format(t, id, x, y, loc_type), file=out_inf)
   num_infections_today += 1
 
-def log_hospitalisation(t, x, y, age):
+def log_hospitalisation(t,id , x, y, age):
   global num_hospitalisations_today
   out_inf = open("{}/covid_out_hospitalisations.csv".format(log_prefix),'a')
-  print("{},{},{},{}".format(t, x, y, age), file=out_inf)
+  print("{},{},{},{},{}".format(t,id, x, y, age), file=out_inf)
   num_hospitalisations_today += 1
 
-def log_death(t, x, y, age):
+def log_death(t, id, x, y, age):
   global num_deaths_today
   out_inf = open("{}/covid_out_deaths.csv".format(log_prefix),'a')
-  print("{},{},{},{}".format(t, x, y, age), file=out_inf)
+  print("{},{},{},{},{}".format(t,id, x, y, age), file=out_inf)
   num_deaths_today += 1
 
-def log_recovery(t, x, y, age):
+def log_recovery(t,id, x, y, age):
   global num_recoveries_today
   out_inf = open("{}/covid_out_recoveries.csv".format(log_prefix),'a')
-  print("{},{},{},{}".format(t, x, y, age), file=out_inf)
+  print("{},{},{},{},{}".format(t,id, x, y, age), file=out_inf)
   num_recoveries_today += 1
 
+def get_unique_id():
+  global id
+  id+=1
+  return id
 
 class Person():
   def __init__(self, location, household, ages):
@@ -116,6 +121,7 @@ class Person():
     self.work_from_home = False
     self.school_from_home = False
     self.phase_duration = 0.0 # duration to next phase.
+    self.id=get_unique_id()
 
     self.status = "susceptible" # states: susceptible, exposed, infectious, recovered, dead, immune.
     self.symptomatic = False # may be symptomatic if infectious
@@ -193,7 +199,7 @@ class Person():
     self.status_change_time = t
     self.mild_version = True
     self.hospitalised = False
-    log_infection(t,self.location.x,self.location.y,location_type)
+    log_infection(t,self.id,self.location.x,self.location.y,location_type)
 
   def progress_condition(self, e, t, disease):
     if self.status_change_time > t:
@@ -216,7 +222,7 @@ class Person():
         if t-self.status_change_time >= self.phase_duration:
           self.status = "recovered"
           self.status_change_time = t
-          log_recovery(t,self.location.x,self.location.y,"house")
+          log_recovery(t,self.id,self.location.x,self.location.y,"house")
       # non-mild version (will involve ICU visit)
       else:
         if not self.hospitalised:
@@ -227,7 +233,7 @@ class Person():
               print("Error: agent is hospitalised, but there are no hospitals in the location graph.")
               sys.exit()
             e.num_hospitalised += 1
-            log_hospitalisation(t, self.location.x, self.location.y, self.age)
+            log_hospitalisation(t,self.id, self.location.x, self.location.y, self.age)
             self.status_change_time = t #hospitalisation is a status change, because recovery_period is from date of hospitalisation.
             if random.random() < self.get_mortality_chance(disease) / self.get_hospitalisation_chance(disease): # avg mortality rate (divided by the average hospitalization rate). TODO: read from YML.
               self.dying = True
@@ -243,11 +249,11 @@ class Person():
             # decease
             if self.dying:
               self.status = "dead"
-              log_death(t,self.location.x,self.location.y,"hospital")
+              log_death(t,self.id,self.location.x,self.location.y,"hospital")
             # hospital discharge
             else:
               self.status = "recovered"
-              log_recovery(t,self.location.x,self.location.y,"hospital")
+              log_recovery(t,self.id,self.location.x,self.location.y,"hospital")
 
 
 
@@ -514,7 +520,7 @@ class Ecosystem:
 
     #Make header for infections file
     out_inf = open("covid_out_infections.csv",'w')
-    print("#time,x,y,location_type", file=out_inf)
+    print("#time,id,x,y,location_type", file=out_inf)
 
 
   def make_group(self, loc_type, max_groups):

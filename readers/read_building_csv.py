@@ -3,6 +3,7 @@ import sys
 import pprint
 import yaml
 import random
+from shapely.geometry import MultiPolygon, Polygon, Point
 
 # File to read in CSV files of building definitions.
 # The format is as follows:
@@ -30,7 +31,7 @@ Change:Need to change household_size
 Explaination: This function generates its own offices. Why?
 '''
 
-def read_building_csv(e, csvfile, building_type_map="covid_data/building_types_map.yml", house_ratio=1, workspace=12, office_size=1600, household_size=2.6, households_per_house=1, work_participation_rate=0.5, dumptypesandquit=False):
+def read_building_csv(e, csvfile, building_type_map="covid_data/building_types_map.yml", house_ratio=1, workspace=12, office_size=1600, household_size=6.45, households_per_house=1, work_participation_rate=0.5, dumptypesandquit=False):
   """
   house_ratio = number of households per house.
   workspace = m2 of office space per worker.
@@ -44,7 +45,6 @@ def read_building_csv(e, csvfile, building_type_map="covid_data/building_types_m
   building_mapping = {}
   with open(building_type_map) as f:
     building_mapping = yaml.load(f, Loader=yaml.FullLoader)
-
   house_csv_count = 0
 
   if csvfile == "":
@@ -85,7 +85,7 @@ def read_building_csv(e, csvfile, building_type_map="covid_data/building_types_m
         if house_csv_count % house_ratio == 0:
           e.addHouse(num_houses, x , y, house_ratio*households_per_house)
           num_houses += 1
-          office_sqm += workspace*household_size*work_participation_rate*house_ratio*households_per_house # 10 sqm per worker, 2.6 person per household, 50% in workforce
+          office_sqm += workspace*household_size*work_participation_rate*house_ratio*households_per_house # counting workspace needed for new house added, containing multiple household, containing multiple person
         house_csv_count += 1
       else:
         #e.addLocation(num_locs, location_type, x, y, building_mapping[location_type]['default_sqm'])

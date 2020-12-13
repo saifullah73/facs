@@ -6,7 +6,10 @@ import random
 import array
 import csv
 import pandas as pd
+from shapely.geometry import MultiPolygon, Polygon, Point
 
+
+c_c = 0
 # TODO: store all this in a YaML file
 lids = {"park":0,"hospital":1,"supermarket":2,"office":3,"school":4,"leisure":5,"shopping":6,"place_of_worship":7} # location ids and labels
 lnames = list(lids.keys())
@@ -44,7 +47,7 @@ class Needs():
               needs_cols[lids[element]] = k
           '''
           this is the mapping established by the below code
-          locaction type (index in csv, index in needs array) 
+          location type (index in csv, index in needs array) 
           school 1,4
           office 2,3
           shopping 3,6
@@ -60,16 +63,47 @@ class Needs():
           self.needs[lids["school"], row_number - 1] = int(0.75 * int(row[needs_cols[lids["school"]]]))  # assuming 25% of school time is outside of the building (PE or breaks)
         row_number += 1
 
-  def get_needs(self, person):
+  def is_in_region(self, person_location, region):
+    '''
+    Region: a multipolygon object
+    Location: Home location of person
+    '''
+    point = Point([person_location.x, person_location.y])
+    return region.contains(point)
+
+
+  def get_needs(self, person, locked_regions = None):
     if not person.hospitalised:
       n = self.needs[:,person.age].copy()
+
+      #smart lockdown reduces needs for people within specific region
+      if locked_regions is not None and person.region is not None and person.region != "unknown":
+        if person.region in locked_regions.keys():
+          global c_c
+          c_c += 1
+          if (c_c % 10000 == 0):
+            print(c_c," agents under smart lockdown")
+          lockdown_strength = locked_regions[person.region][0] #this factor is to simulate a few streets closing in a region instead of the entire region
+          needs_reduction_factor = lockdown_strength - 1
+          n[lids["office"]] = n[lids["office"]] * needs_reduction_factor
+          n[lids["school"]] = n[lids["school"]] * needs_reduction_factor
+          n[lids["park"]] = n[lids["park"]] * needs_reduction_factor
+          n[lids["hospital"]] = n[lids["hospital"]] * needs_reduction_factor
+          n[lids["leisure"]] = n[lids["leisure"]] * needs_reduction_factor
+          n[lids["shopping"]] = n[lids["shopping"]] * needs_reduction_factor
+          n[lids["supermarket"]] = max(n[lids["supermarket"]] * needs_reduction_factor,20) #people still go to supermarkets atleast 20 min per day
+          n[lids["place_of_worship"]] = max(n[lids["place_of_worship"]] * needs_reduction_factor,40) #people still go for prayers atleast 40 min per day
+          return n
+
       if person.work_from_home:
         n[lids["office"]]=0
       if person.school_from_home:
         n[lids["school"]]=0
       return n
     else:
-      return np.array([0,5040,0,0,0,0,0,0]) #5040 minutes per week for hospitals.
+      # return np.array([0,5040,0,0,0,0,0,0]) #5040 minutes per week for hospitals.
+      return np.array([0, 720, 0, 0, 0, 0, 0, 0])
+
 
 # Global storage for needs now, to keep it simple.
 needs = Needs("covid_data/needs.csv")
@@ -77,7 +111,25 @@ num_infections_today = 0
 num_hospitalisations_today = 0
 num_deaths_today = 0
 num_recoveries_today = 0
-log_prefix = "."
+cases_in_regions_today = {}
+log_prefix = "output"
+
+def log_region_status(t):
+  global cases_in_regions_today
+  out_inf = open("{}/cases_in_regions2.csv".format(log_prefix),'a+')
+  out_inf.seek(0,0) #go to start of file
+  if out_inf.readline().split(",")[0] != "day": #check if header exists or not
+    header = "day,"
+    for name in cases_in_regions_today.keys():
+      header += str(name) + ","
+    header = header[:-1]
+    print(header,file=out_inf)
+  out_inf.seek(0, 2) #go to start of file
+  output = str(t)+","
+  for case_count in cases_in_regions_today.values():
+    output += str(case_count)+","
+  output = output[:-1]
+  print(output, file=out_inf)
 
 def log_infection(t, x, y, loc_type):
   global num_infections_today
@@ -108,7 +160,7 @@ class Person():
   def __init__(self, location, household, ages):
     self.location = location # current location
     self.location.IncrementNumAgents()
-    self.home_location = location
+    self.home_location = location #type House
     self.household = household
     self.mild_version = True
     self.hospitalised = False
@@ -116,12 +168,26 @@ class Person():
     self.work_from_home = False
     self.school_from_home = False
     self.phase_duration = 0.0 # duration to next phase.
-
     self.status = "susceptible" # states: susceptible, exposed, infectious, recovered, dead, immune.
     self.symptomatic = False # may be symptomatic if infectious
     self.status_change_time = -1
     self.age = np.random.choice(91, p=ages) # age in years p = probability
+    self.region = None  # determines in which location a person house resides
 
+
+  def assign_region(self,regions):
+    '''
+    regions: list of polygons objects for all regions in simulation
+    '''
+    for name,poly in regions.items():
+      x = self.location.x
+      y = self.location.y
+      point = Point([x,y])
+      if(poly.contains(point)):
+        self.region = name
+    # no region exists for this person
+    if self.region == None:
+      self.region = "unknown"
 
   def assign_group(self, location_type, num_groups):
     """
@@ -146,17 +212,16 @@ class Person():
     return False
 
 
-  def plan_visits(self, e, deterministic=False):
+
+  def plan_visits(self, e, deterministic=False,locked_regions = None):
     """
     Plan visits for the day.
     TODO: plan visits to classes not using nearest location (make an override).
     """
-
     if self.status in ["susceptible","exposed","infectious"]: # recovered people are assumed to be immune.
-      personal_needs = needs.get_needs(self)
+      personal_needs = needs.get_needs(self,locked_regions)
       for k,element in enumerate(personal_needs):
         nearest_locs = self.home_location.nearest_locations
-
         if element < 1:
           continue
         elif k == lids["hospital"] and self.hospitalised:
@@ -169,7 +234,7 @@ class Person():
           location_to_visit = nearest_locs[k]
         else: #no known nearby locations.
           continue
-      
+
         location_to_visit.register_visit(e, self, element, deterministic)
 
   def print_needs(self):
@@ -189,13 +254,16 @@ class Person():
   def infect(self, t, severity="exposed", location_type="house"):
     # severity can be overridden to infectious when rigidly inserting cases.
     # but by default, it should be exposed.
+    global cases_in_regions_today
     self.status = severity
     self.status_change_time = t
     self.mild_version = True
     self.hospitalised = False
     log_infection(t,self.location.x,self.location.y,location_type)
+    cases_in_regions_today[self.region] += 1
 
   def progress_condition(self, e, t, disease):
+    global cases_in_regions_today
     if self.status_change_time > t:
       return
     if self.status == "exposed" and t-self.status_change_time >= int(self.phase_duration):
@@ -217,6 +285,7 @@ class Person():
           self.status = "recovered"
           self.status_change_time = t
           log_recovery(t,self.location.x,self.location.y,"house")
+          cases_in_regions_today[self.region] -= 1
       # non-mild version (will involve ICU visit)
       else:
         if not self.hospitalised:
@@ -244,10 +313,12 @@ class Person():
             if self.dying:
               self.status = "dead"
               log_death(t,self.location.x,self.location.y,"hospital")
+              cases_in_regions_today[self.region] -= 1
             # hospital discharge
             else:
               self.status = "recovered"
               log_recovery(t,self.location.x,self.location.y,"hospital")
+              cases_in_regions_today[self.region] -= 1
 
 
 
@@ -258,7 +329,6 @@ class Household():
       self.size = size
     else:
       self.size = random.choice([1,2,3,4])
-
     self.agents = []
     for i in range(0,self.size):
       self.agents.append(Person(self.house, self, ages))
@@ -408,6 +478,8 @@ class Location:
   def clear_visits(self):
     self.visits = []
     self.visit_minutes = 0 # total number of minutes of all visits aggregated.
+    #added by Saif
+    self.inf_visit_minutes = 0
 
   def register_visit(self, e, person, need, deterministic):
     visit_time = self.avg_visit_time
@@ -421,14 +493,16 @@ class Location:
     Explaination: Why some location types has need in terms of minutes per week
     '''
     if person.hospitalised and self.type == "hospital":
-      self.inf_visit_minutes += need/7 * e.hospital_protection_factor
+      # self.inf_visit_minutes += need/7 * e.hospital_protection_factor
+      self.inf_visit_minutes += need * e.hospital_protection_factor
       return
 
     if visit_time > 0.0:
       '''
       need is per day, and visit time is being multiplied by 7, why?
       '''
-      visit_probability = need/(visit_time * 7) # = minutes per week / (average visit time * days in the week)
+      # visit_probability = need/(visit_time * 7) # = minutes per week / (average visit time * days in the week)
+      visit_probability = need / (visit_time)
       #if ultraverbose:
       #  print("visit prob = ", visit_probability)
     else:
@@ -510,11 +584,26 @@ class Ecosystem:
     self.status = {"susceptible":0,"exposed":0,"infectious":0,"recovered":0,"dead":0,"immune":0}
     self.enforce_masks_on_transport = False
     self.loc_groups = {}
-    self.needsfile = needsfile 
+    self.needsfile = needsfile
+    self.regions = {}
+    self.region_under_lockdown = {}
 
     #Make header for infections file
     out_inf = open("covid_out_infections.csv",'w')
     print("#time,x,y,location_type", file=out_inf)
+
+  def set_regions(self,regions):
+    global cases_in_regions_today
+    self.regions = regions
+    for x in regions:
+      cases_in_regions_today[x] = 0
+    cases_in_regions_today["unknown"] = 0
+
+  def assign_region_to_agents(self):
+    for k,e in enumerate(self.houses):
+      for hh in e.households:
+        for a in hh.agents:
+          a.assign_region(self.regions)
 
 
   def make_group(self, loc_type, max_groups):
@@ -622,6 +711,8 @@ class Ecosystem:
   def evolve(self, reduce_stochasticity=False):
     global num_infections_today
     global num_hospitalisations_today
+    global c_c
+    c_c = 0
     num_infections_today = 0
     num_hospitalisations_today = 0 
     self.vaccinations_today = 0
@@ -635,7 +726,7 @@ class Ecosystem:
     for h in self.houses:
       for hh in h.households:
         for a in hh.agents:
-          a.plan_visits(self, reduce_stochasticity)
+          a.plan_visits(self, reduce_stochasticity,self.region_under_lockdown)
           a.progress_condition(self, self.time, self.disease)
 
           if self.vaccinations_available - self.vaccinations_today > 0:
@@ -656,8 +747,11 @@ class Ecosystem:
     # process intra-household infection spread.
     for h in self.houses:
       h.evolve(self, self.time, self.disease)
-    
+    self.remove_expired_regions_from_lockdown()
+    log_region_status(self.time)
     self.time += 1
+
+
 
   def addHouse(self, name, x, y, num_households=1):
     h = House(self, x, y, num_households)
@@ -674,13 +768,38 @@ class Ecosystem:
     return l
 
   def add_closure(self, loc_type, time):
-    self.closures[loc_type] = time
+    self.closures[loc_type] = time #this might be the number of days for which the location should stay open
 
   def remove_closure(self, loc_type):
     del self.closures[loc_type]
 
   def remove_closures(self):
     self.closures = {}
+
+  def remove_expired_regions_from_lockdown(self):
+    regionsToRemove = []
+    for name,obj in self.region_under_lockdown.items():
+      days_left = self.region_under_lockdown[name][1]
+      if (days_left-1 == 0):
+        regionsToRemove.append(name)
+      else:
+        self.region_under_lockdown[name][1] = days_left - 1
+    for name in regionsToRemove:
+      self.remove_region_from_lockdown(name)
+
+
+
+  def add_region_under_lockdown(self,name,strength = 1,days = 1):
+    '''
+    polygon: Multipolygon object representing the region
+    strength: a factor used to incorporate a few streets closing, instead of entire region (0-1) (no lockdown - full region lockdown)
+    days: how many days should a region stay under lockdown
+    '''
+    self.region_under_lockdown[name] = [strength,days]
+
+  def remove_region_from_lockdown(self,name):
+    del self.region_under_lockdown[name]
+
 
   def add_partial_closure(self, loc_type, fraction=0.8, exclude_people=False):
     if loc_type == "school" and exclude_people:
@@ -697,6 +816,14 @@ class Ecosystem:
               a.work_from_home = True
     else:
       needs.needs[lids[loc_type],:] *= (1.0 - fraction)
+
+
+  def close_school_in_region(self, fraction=1, days = 1):
+      for k,e in enumerate(self.houses):
+        for hh in e.households:
+          for a in hh.agents:
+            if random.random() < fraction:
+              a.school_from_home = True
 
   def undo_partial_closure(self, loc_type, fraction=0.8):
     if loc_type == "school":

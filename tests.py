@@ -1,8 +1,35 @@
-from readers import read_age_csv
-import numpy as np
-import csv
-# .read_disease_yml("/home/saifullah/Saif/FYP/Projects/facs/covid_data/disease_covid19.yml")
+from readers import read_poly
 
-# read_age_csv.read_age_csv("/home/saifullah/Saif/FYP/Projects/facs/covid_data/age-distr.csv")
 
-print([i for i in range(10)])
+log_prefix = "output"
+cases_in_regions_today = {}
+def log_region_status(t):
+  global cases_in_regions_today
+  out_inf = open("{}/cases_in_regions2.csv".format(log_prefix),'a+')
+  out_inf.seek(0,0) #go to start of file
+  if out_inf.readline().split(",")[0] != "day": #check if header exists or not
+    header = "day,"
+    for name in cases_in_regions_today.keys():
+      header += str(name) + ","
+    header = header[:-1]
+    print(header,file=out_inf)
+  out_inf.seek(0, 2) #go to start of file
+  output = str(t)+","
+  for case_count in cases_in_regions_today.values():
+    output += str(case_count)+","
+  output = output[:-1]
+  print(output, file=out_inf)
+
+
+def set_regions(regions):
+    global cases_in_regions_today
+    for x in regions:
+      cases_in_regions_today[x] = 1
+    cases_in_regions_today["unknown"] = 0
+
+regions = read_poly.readPolyFiles("poly_files")
+set_regions(regions)
+print(cases_in_regions_today.keys())
+# log_region_status(1)
+
+

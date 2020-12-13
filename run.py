@@ -1,6 +1,7 @@
 import facs.facs as facs
 import facs.measures as measures
 from readers import read_age_csv
+from readers import read_poly
 import numpy as np
 from readers import read_building_csv
 from readers import read_cases_csv
@@ -12,8 +13,19 @@ from os import makedirs, path
 import argparse
 import csv
 from pprint import pprint
+"""
+Parameter Description:
+ci_multiplier: Multiplier set for Case Isolation which represents the ratio of out-of-house interactions for Covid patients relative to the default interaction rate. Default value comes from Imp Report 9.
+house ratio: number of households per house placed (higher number adds noise, but reduces runtime
+workspace: m2 per employee on average. (10 in an office setting, but we use 12 as some people work in more spacious environments)
+household size: average size of each household, specified separately here.
+work participation rate: fraction of population in workforce, irrespective of age
+"""
 
 
+'''
+First case of coronavirus in Islamabad was 29th Feb, so we are assuming that first day of our simulation if 29th of Feb, (warmup starts from 9th Feb) 
+'''
 if __name__ == "__main__":
 
     # Instantiate the parser
@@ -57,23 +69,36 @@ if __name__ == "__main__":
                     elif row[0].lower() == "transition_mode":
                         transition_mode = int(row[1])
 
+
+    # transition_day = -1
+    # if transition_mode == 1:
+    #     transition_day = 77  # 15th of April
+    # if transition_mode == 2:
+    #     transition_day = 93  # 31st of May
+    # if transition_mode == 3:
+    #     transition_day = 108  # 15th of June
+    # if transition_mode == 4:
+    #     transition_day = 123  # 30th of June
+    # if transition_mode > 10:
+    #     transition_day = transition_mode
+
     transition_day = -1
     if transition_mode == 1:
-        transition_day = 77  # 15th of April
-    if transition_mode == 2:
-        transition_day = 93  # 31st of May
-    if transition_mode == 3:
-        transition_day = 108  # 15th of June
-    if transition_mode == 4:
-        transition_day = 123  # 30th of June
-    if transition_mode > 10:
-        transition_day = transition_mode
+        transition_day = 24 #25th March (lockdown started)
+    # if transition_mode == 2:
+    #     transition_day = 93
+    # if transition_mode == 3:
+    #     transition_day = 108
+    # if transition_mode == 4:
+    #     transition_day = 123
+    # if transition_mode > 10:
+    #     transition_day = transition_mode
 
     # check the transition scenario argument
     AcceptableTransitionScenario = ['no-measures', 'extend-lockdown',
                                     'open-all', 'open-schools', 'open-shopping',
                                     'open-leisure', 'work50', 'work75',
-                                    'work100', 'dynamic-lockdown', 'periodic-lockdown','uk-forecast']
+                                    'work100', 'dynamic-lockdown', 'periodic-lockdown','uk-forecast','smart-lockdown']
 
     if transition_scenario not in AcceptableTransitionScenario:
         print("\nError !\n\tThe input transition scenario, %s , is not VALID" %
@@ -93,9 +118,9 @@ if __name__ == "__main__":
     if args.generic_outfile:
       outfile = "{}/out.csv".format(output_dir)
 
-    end_time = 180
+    end_time = 365
     if transition_scenario in ["extend-lockdown","dynamic-lockdown","periodic-lockdown","uk-forecast"]:
-        end_time = 227 #starting from 13th march till 26th Oct
+        end_time = 253 #starting from 29th Feb till 8th Nov
       # end_time = 730
 
     print("Running basic Covid-19 simulation kernel.")
@@ -119,10 +144,20 @@ if __name__ == "__main__":
         "{}/disease_covid19.yml".format(data_dir))
 
     building_file = "{}/{}_buildings.csv".format(data_dir, location)
+    print("Reading Regions.....")
+    regions = read_poly.readPolyFiles("poly_files")
+    e.set_regions(regions)
+    print("Total Regions read: " + str(len(regions)))
+    print("Regions are " + str(list(regions.keys())))
     read_building_csv.read_building_csv(e,
                                         building_file,
                                         "{}/building_types_map.yml".format(data_dir),
-                                        house_ratio=house_ratio, workspace=12, office_size=1600, household_size=6.7, work_participation_rate=0.5)
+                                        house_ratio=house_ratio, workspace=12, office_size=1600, household_size=6.45, work_participation_rate=0.5)
+
+    print("Assigning regions to agents.... ")
+    e.assign_region_to_agents()
+    print("Done")
+
     # house ratio: number of households per house placed (higher number adds noise, but reduces runtime
     # And then 3 parameters that ONLY affect office placement.
     # workspace: m2 per employee on average. (10 in an office setting, but we use 12 as some people work in more spacious environments)
@@ -141,6 +176,8 @@ if __name__ == "__main__":
       starting_num_infections = int(args.starting_infections)
     if location == "test":
       starting_num_infections = 10
+    if location == "i8":
+        starting_num_infections = 10
 
     for i in range(0,10):
       e.add_infections(int(starting_num_infections/10), i-19)
@@ -157,8 +194,8 @@ if __name__ == "__main__":
         else:
             e.print_status(outfile, silent=True)
 
-
     track_trace_limit = 0.2 + transition_mode*0.1
+
 
 
     for t in range(0, end_time):
@@ -181,27 +218,29 @@ if __name__ == "__main__":
             elif transition_scenario == "work100":
                 measures.work100(e)
 
-        if t>77 and transition_scenario == "dynamic-lockdown" and t%7 == 0:
+        if t>24 and transition_scenario == "dynamic-lockdown" and t%7 == 0:
             print("Dynamic lockdown test: {}/100".format(e.num_hospitalised), file=sys.stderr)
             measures.enact_dynamic_lockdown(e, measures.work50, e.num_hospitalised, 100)
-        if t>77 and transition_scenario == "periodic-lockdown" and t%61 == 0:
-            print("Periodic lockdown with 61 day interval.")
+        if t>24 and transition_scenario == "periodic-lockdown" and t%30 == 0:
+            print("Periodic lockdown with 30 day interval.")
             measures.enact_periodic_lockdown(e, measures.work50)
 
         # Recording of existing measures
         if transition_scenario in ["uk-forecast"]:
           measures.uk_lockdown_forecast(e, t, transition_mode)
+        if transition_scenario in ["smart-lockdown"]:
+            measures.smart_lockdown_hard(e,t)
         elif transition_scenario not in ["no-measures"]:
           measures.uk_lockdown_existing(e, t, track_trace_limit=track_trace_limit)
 
         # Propagate the model by one time step.
+        print(str(t))
+        print(e.region_under_lockdown)
         e.evolve()
-
-        print(t)
         e.print_status(outfile)
 
     # calculate cumulative sums.
     e.add_cum_column(outfile, ["dead", "num hospitalisations today", "infectious", "num infections today"])
 
     print("Simulation complete.", file=sys.stderr)
-    print("Time taken : "+ str(datetime.datetime.now()-begin_time) + "HH:MM:SS:milliseconds")
+    print("Time taken : "+ str(datetime.datetime.now()-begin_time) + " HH:MM:SS:milliseconds")

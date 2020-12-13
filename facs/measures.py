@@ -11,9 +11,88 @@ def full_lockdown(e):
   e.add_case_isolation()
   e.add_household_isolation()
 
+# First case recorde in Pakistan on Feburary 26th
+def smart_lockdown_hard(e,t):
+  if t == 13: # 13th March
+    #school underlockdown, first major response to covid
+    work50(e)
+  if t == 35: # 1st April
+    #I8 under lockdown for two weeks
+    e.add_region_under_lockdown("I8.1",1,14)
+    e.add_region_under_lockdown("I8.2", 1,14)
+    e.add_region_under_lockdown("I8.3", 1,14)
+    e.add_region_under_lockdown("I8.4", 1,14)
+    #I10 under lockdown for two weeks
+    e.add_region_under_lockdown("I10.1", 1,14)
+    e.add_region_under_lockdown("I10.2", 1,14)
+    e.add_region_under_lockdown("I10.3", 1,14)
+    e.add_region_under_lockdown("I10.4", 1,14)
+    # G8 under lockdown for two weeks
+  if t == 73: #9th May
+    full_lockdown(e)
+  if t == 103: # remove full lockdown enacted on 9th May
+    work50(e)
+  if t == 111: # 16th June
+    # I8 under lockdown for a week
+    e.add_region_under_lockdown("I8.1", 1, 7)
+    e.add_region_under_lockdown("I8.2", 1, 7)
+    e.add_region_under_lockdown("I8.3", 1, 7)
+    e.add_region_under_lockdown("I8.4", 1, 7)
+    # I10 under lockdown for a week
+    e.add_region_under_lockdown("I10.1", 1, 7)
+    e.add_region_under_lockdown("I10.2", 1, 7)
+    e.add_region_under_lockdown("I10.3", 1, 7)
+    e.add_region_under_lockdown("I10.4", 1, 7)
+  if t == 117: # 22nd June
+    # ghauri town under lockdown
+    pass
+  if t == 118: #23rd June
+    e.add_region_under_lockdown("I8.3", 1, 7)
+    e.add_region_under_lockdown("I8.4", 1, 7)
+    e.add_region_under_lockdown("I10.2", 1, 7)
+    # where is I10 markaz
+  if t == 121: # 26th June
+    pass
+    # ghauri town phase 4 and 5 locked
+  if t == 124: #29th June
+    pass
+    #G-9/2,3 under lockdown
+  if t == 202: # 15th September
+    pass # ripah medical college under lockdown
+  if t == 222: # 5th Oct
+    e.add_region_under_lockdown("G10.4", 0.5, 7)
+    e.add_region_under_lockdown("I8.2", 0.3, 7)
+    e.add_region_under_lockdown("G11.2",0.1,7)
+    # schools closed in G11/2 and G7/3 and G7/2
+    #G9 two streets as well
+  if t ==231: # 14th Oct
+    pass
+    # school at F-6/2 closed
+  if t == 240: # 23rd Oct
+    pass
+    #Fazaia medical college closed
+  if t==243: #26th Oct
+    e.add_region_under_lockdown("F11.3", 0.1, 7)
+    e.add_region_under_lockdown("F11.2", 0.1, 7)
+    e.add_region_under_lockdown("I8.2", 0.1, 7)
+    e.add_region_under_lockdown("I8.3", 0.1, 7)
+    e.add_region_under_lockdown("I8.4", 0.1, 7)
+    e.add_region_under_lockdown("I10.2", 0.1, 7)
+    e.add_region_under_lockdown("G11.2", 0.1, 7)
+    e.add_region_under_lockdown("G6.2", 0.1, 7)
+  if t == 245: #28th Oct
+    pass #Quaid e azam university closed
+  if t == 257: # 9th November
+    e.add_region_under_lockdown("I8.3", 1, 7)
+    e.add_region_under_lockdown("I8.4", 1, 7)
+    e.add_region_under_lockdown("G10.4",1,7)
+    e.add_region_under_lockdown("G6.2",1,7)
+
+
 '''
 Explaination: Define parameters
 '''
+
 def uk_lockdown(e, phase=1, transition_fraction=1.0, keyworker_fraction=0.18, track_trace_limit=0.5, compliance=0.0):
   """
   Code which reflects EXISTING UK lockdown measures.
@@ -83,7 +162,7 @@ def uk_lockdown(e, phase=1, transition_fraction=1.0, keyworker_fraction=0.18, tr
   if phase == 9: # Enacted Sept 1st
     e.add_social_distance(compliance=0.7 + compliance, mask_uptake=0.2, mask_uptake_shopping=0.8)
     e.add_work_from_home(0.3)
-    e.traffic_multiplier = 0.25 # https://data.london.gov.uk/dataset/coronavirus-covid-19-mobility-report (estimate)
+    e.traffic_multiplier = 0.25 # https:///data.london.gov.uk/dataset/coronavirus-covid-19-mobility-report (estimate)
     e.track_trace_multiplier = track_trace_limit # 50% of cases escape track and trace.
   if phase == 10: # Enacted Sept 22nd
     e.add_social_distance(compliance=0.7 + compliance, mask_uptake=0.2, mask_uptake_shopping=0.8)

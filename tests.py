@@ -22,14 +22,18 @@ def log_region_status(t):
 
 
 def set_regions(regions):
-    global cases_in_regions_today
-    for x in regions:
-      cases_in_regions_today[x] = 1
-    cases_in_regions_today["unknown"] = 0
+    temp = {}
+    for x in regions.keys():
+      temp[x] = 1
+    temp["unknown"] = 0
+    return temp
 
 regions = read_poly.readPolyFiles("poly_files")
-set_regions(regions)
-print(cases_in_regions_today.keys())
+for i in range(5):
+  regions = set_regions(regions)
+  print(regions)
+
+# print(cases_in_regions_today.keys())
 # log_region_status(1)
 
 

@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
     transition_day = -1
     if transition_mode == 1:
-        transition_day = 24 #25th March (lockdown started)
+        transition_day = 73 #9th May (lockdown started)
     # if transition_mode == 2:
     #     transition_day = 93
     # if transition_mode == 3:
@@ -157,7 +157,7 @@ if __name__ == "__main__":
     print("Assigning regions to agents.... ")
     e.assign_region_to_agents()
     print("Done")
-
+    e.test_agents_in_regions()
     # house ratio: number of households per house placed (higher number adds noise, but reduces runtime
     # And then 3 parameters that ONLY affect office placement.
     # workspace: m2 per employee on average. (10 in an office setting, but we use 12 as some people work in more spacious environments)
@@ -190,9 +190,9 @@ if __name__ == "__main__":
         e.evolve(reduce_stochasticity=False)
         print(e.time)
         if args.dbg:
-            e.print_status(outfile)
+            e.update_and_print_status(outfile,output_dir)
         else:
-            e.print_status(outfile, silent=True)
+            e.update_and_print_status(outfile,output_dir=output_dir,silent=True)
 
     track_trace_limit = 0.2 + transition_mode*0.1
 
@@ -227,17 +227,17 @@ if __name__ == "__main__":
 
         # Recording of existing measures
         if transition_scenario in ["uk-forecast"]:
-          measures.uk_lockdown_forecast(e, t, transition_mode)
+            measures.uk_lockdown_forecast(e, t, transition_mode)
         if transition_scenario in ["smart-lockdown"]:
             measures.smart_lockdown_hard(e,t)
         elif transition_scenario not in ["no-measures"]:
-          measures.uk_lockdown_existing(e, t, track_trace_limit=track_trace_limit)
+            measures.uk_lockdown_existing(e, t, track_trace_limit=track_trace_limit)
 
         # Propagate the model by one time step.
         print(str(t))
         print(e.region_under_lockdown)
         e.evolve()
-        e.print_status(outfile)
+        e.update_and_print_status(outfile,output_dir)
 
     # calculate cumulative sums.
     e.add_cum_column(outfile, ["dead", "num hospitalisations today", "infectious", "num infections today"])

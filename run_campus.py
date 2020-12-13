@@ -170,9 +170,9 @@ if __name__ == "__main__":
         e.evolve(reduce_stochasticity=False)
         print(e.time)
         if args.dbg:
-            e.print_status(outfile)
+            e.update_and_print_status(outfile)
         else:
-            e.print_status(outfile, silent=True)
+            e.update_and_print_status(outfile, silent=True)
 
     track_trace_limit = 0.2 + transition_mode*0.1
 
@@ -199,6 +199,6 @@ if __name__ == "__main__":
         e.evolve()
 
         print(t)
-        e.print_status(outfile)
+        e.update_and_print_status(outfile)
 
     print("Simulation complete.", file=sys.stderr)

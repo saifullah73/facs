@@ -11,23 +11,32 @@ def full_lockdown(e):
   e.add_case_isolation()
   e.add_household_isolation()
 
-# First case recorde in Pakistan on Feburary 26th
+
+# First case recorded in Pakistan on Feburary 26th, and we start our simulation from here (20 days for warmup are performed prior)
 def smart_lockdown_hard(e,t):
   if t == 13: # 13th March
     #school underlockdown, first major response to covid
-    work50(e)
+    e.remove_all_measures()
+    e.add_closure("school", 0)
+    e.add_case_isolation()
+    e.add_household_isolation()
   if t == 35: # 1st April
-    #I8 under lockdown for two weeks
-    e.add_region_under_lockdown("I8.1",1,14)
-    e.add_region_under_lockdown("I8.2", 1,14)
-    e.add_region_under_lockdown("I8.3", 1,14)
-    e.add_region_under_lockdown("I8.4", 1,14)
-    #I10 under lockdown for two weeks
-    e.add_region_under_lockdown("I10.1", 1,14)
-    e.add_region_under_lockdown("I10.2", 1,14)
-    e.add_region_under_lockdown("I10.3", 1,14)
-    e.add_region_under_lockdown("I10.4", 1,14)
-    # G8 under lockdown for two weeks
+    #I8 under lockdown for a week
+    e.add_region_under_lockdown("I8.1",1,7)
+    e.add_region_under_lockdown("I8.2", 1,7)
+    e.add_region_under_lockdown("I8.3", 1,7)
+    e.add_region_under_lockdown("I8.4", 1,7)
+    #I10 under lockdown for a week
+    e.add_region_under_lockdown("I10.1", 1,7)
+    e.add_region_under_lockdown("I10.2", 1,7)
+    e.add_region_under_lockdown("I10.3", 1,7)
+    e.add_region_under_lockdown("I10.4", 1,7)
+    # G9 under lockdown for a week
+    e.add_region_under_lockdown("G9.1", 1, 7)
+    e.add_region_under_lockdown("G9.2", 1, 7)
+    e.add_region_under_lockdown("G9.3", 1, 7)
+    e.add_region_under_lockdown("G9.4", 1, 7)
+    e.add_region_under_lockdown("G9.Markaz", 1, 7)
   if t == 73: #9th May
     full_lockdown(e)
   if t == 103: # remove full lockdown enacted on 9th May
@@ -43,28 +52,36 @@ def smart_lockdown_hard(e,t):
     e.add_region_under_lockdown("I10.2", 1, 7)
     e.add_region_under_lockdown("I10.3", 1, 7)
     e.add_region_under_lockdown("I10.4", 1, 7)
+    # G9 under lockdown for a week
+    e.add_region_under_lockdown("G9.1", 1, 7)
+    e.add_region_under_lockdown("G9.2", 1, 7)
+    e.add_region_under_lockdown("G9.3", 1, 7)
+    e.add_region_under_lockdown("G9.4", 1, 7)
+    e.add_region_under_lockdown("G9.Markaz", 1, 7)
   if t == 117: # 22nd June
-    # ghauri town under lockdown
-    pass
+    e.add_region_under_lockdown("GhauriTown.Phase1", 1, 7)
+    e.add_region_under_lockdown("GhauriTown.Phase2", 1, 7)
+    e.add_region_under_lockdown("GhauriTown.Phase3", 1, 7)
+    e.add_region_under_lockdown("GhauriTown.Phase4A", 1, 7)
+    e.add_region_under_lockdown("GhauriTown.Phase4B", 1, 7)
+    e.add_region_under_lockdown("GhauriTown.Phase5", 1, 7)
+    e.add_region_under_lockdown("GhauriTown.Phase5B", 1, 7)
+    e.add_region_under_lockdown("GhauriTown.Phase7", 1, 7)
+    e.add_region_under_lockdown("GhauriTown.VIPBlock", 1, 7)
   if t == 118: #23rd June
     e.add_region_under_lockdown("I8.3", 1, 7)
     e.add_region_under_lockdown("I8.4", 1, 7)
     e.add_region_under_lockdown("I10.2", 1, 7)
     # where is I10 markaz
   if t == 121: # 26th June
-    pass
-    # ghauri town phase 4 and 5 locked
-  if t == 124: #29th June
-    pass
-    #G-9/2,3 under lockdown
+    e.add_region_under_lockdown("GhauriTown.Phase4A", 1, 7)
+    e.add_region_under_lockdown("GhauriTown.Phase5", 1, 7)
   if t == 202: # 15th September
     pass # ripah medical college under lockdown
-  if t == 222: # 5th Oct
+  if t == 226: # 9th Oct
     e.add_region_under_lockdown("G10.4", 0.5, 7)
     e.add_region_under_lockdown("I8.2", 0.3, 7)
     e.add_region_under_lockdown("G11.2",0.1,7)
-    # schools closed in G11/2 and G7/3 and G7/2
-    #G9 two streets as well
   if t ==231: # 14th Oct
     pass
     # school at F-6/2 closed

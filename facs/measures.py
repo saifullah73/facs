@@ -11,6 +11,14 @@ def full_lockdown(e):
   e.add_case_isolation()
   e.add_household_isolation()
 
+def automatic_smart_lockdown(e,t,threshold,days = 7):
+  for region,cases in e.cases_in_regions_today.keys():
+    if cases >= threshold:
+      strength = round(1 - (0.3/(((cases - threshold)/threshold) + 1)),2)
+      print(region + " under lockdown-strength= "+str(strength)+" days= "+str(days))
+      e.add_region_under_lockdown(region,1,days)
+
+
 
 # First case recorded in Pakistan on Feburary 26th, and we start our simulation from here (20 days for warmup are performed prior)
 def smart_lockdown_hard(e,t):

@@ -110,7 +110,7 @@ class Needs():
 
 
 # Global storage for needs now, to keep it simple.
-needs = Needs("covid_data/needs.csv")
+needs = Needs("islamabad_covid_data/needs.csv")
 num_infections_today = 0
 num_hospitalisations_today = 0
 num_deaths_today = 0
@@ -544,7 +544,7 @@ class Location:
 
 
 class Ecosystem:
-    def __init__(self, duration, needsfile="covid_data/needs.csv"):
+    def __init__(self, duration, needsfile="islamabad_covid_data/needs.csv"):
         self.locations = {}
         self.houses = []
         self.house_names = []

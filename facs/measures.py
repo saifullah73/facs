@@ -10,9 +10,11 @@ def full_lockdown(e):
   e.add_work_from_home()
   e.add_case_isolation()
   e.add_household_isolation()
+  #remove later
+  # e.track_trace_multiplier = 0.8
 
 def automatic_smart_lockdown(e,t,threshold,days = 7):
-  for region,cases in e.cases_in_regions_today.keys():
+  for region,cases in e.cases_in_regions_today.items():
     if cases >= threshold:
       strength = round(1 - (0.3/(((cases - threshold)/threshold) + 1)),2)
       print(region + " under lockdown-strength= "+str(strength)+" days= "+str(days))
@@ -22,7 +24,7 @@ def automatic_smart_lockdown(e,t,threshold,days = 7):
 
 # First case recorded in Pakistan on Feburary 26th, and we start our simulation from here (20 days for warmup are performed prior)
 def smart_lockdown_hard(e,t):
-  if t == 13: # 13th March
+  if t == 16: # 13th March
     #school underlockdown, first major response to covid
     e.remove_all_measures()
     e.add_closure("school", 0)

@@ -110,7 +110,7 @@ class Needs():
 
 
 # Global storage for needs now, to keep it simple.
-needs = Needs("islamabad_covid_data/needs.csv")
+needs = Needs("covid_data/needs.csv")
 num_infections_today = 0
 num_hospitalisations_today = 0
 num_deaths_today = 0
@@ -337,7 +337,6 @@ class Household():
                 if ic > 0:
                     infection_chance = e.contact_rate_multiplier[
                                            "house"] * disease.infection_rate * home_interaction_fraction * ic
-                    '''Explaination: Household isolation multipler '''
                     if needs.household_isolation_multiplier < 1.0:
                         infection_chance *= 2.0  # interaction duration (and thereby infection chance) double when household isolation is incorporated (Imperial Report 9).
                     if random.random() < infection_chance:
@@ -544,7 +543,7 @@ class Location:
 
 
 class Ecosystem:
-    def __init__(self, duration, needsfile="islamabad_covid_data/needs.csv"):
+    def __init__(self, duration, needsfile="covid_data/needs.csv"):
         self.locations = {}
         self.houses = []
         self.house_names = []
@@ -890,6 +889,8 @@ class Ecosystem:
             "SD (covid_flee method) with distance {} and compliance {}".format(distance, compliance))
 
     def add_case_isolation(self):
+        # 0 means complete self isolation 1 means no case isolation
+        # same for Case Isolation and Track Trace Multiplier
         self.self_isolation_multiplier = self.ci_multiplier * self.track_trace_multiplier
         self.print_isolation_rate("CI with multiplier {}".format(self.self_isolation_multiplier))
 

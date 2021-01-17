@@ -988,6 +988,7 @@ class Ecosystem:
 
     def test_agents_in_regions(self):
         temp = {}
+        unknownAgents = open('output/unknown_agents.csv','w')
         for k, e in enumerate(self.houses):
             for hh in e.households:
                 for a in hh.agents:
@@ -995,11 +996,15 @@ class Ecosystem:
                         temp[a.region] = temp[a.region] + 1
                     else:
                         temp[a.region] = 1
+                    if a.region == "unknown":
+                        line = str(a.location.x) +","+str(a.location.y)+"\n"
+                        unknownAgents.write(line)
         cumm_agents = 0
         for region, agents in temp.items():
             cumm_agents += agents
             print(region, agents)
         print("Cummulative agents = " + str(cumm_agents))
+        unknownAgents.close()
 
     def add_validation_point(self, time):
         self.validation[max(time, 0)] += 1

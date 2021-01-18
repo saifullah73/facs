@@ -56,6 +56,8 @@ if __name__ == "__main__":
     output_dir = args.output_dir
     data_dir = args.data_dir
 
+    begin_time = datetime.datetime.now()
+
     # if simsetting.csv exists -> overwrite the simulation setting parameters
     if path.isfile('simsetting.csv'):
         with open('simsetting.csv', newline='') as csvfile:
@@ -84,7 +86,7 @@ if __name__ == "__main__":
 
     transition_day = -1
     if transition_mode == 1:
-        transition_day = 73 #9th May (lockdown started)
+        transition_day = 27 #lockdown on 24th March
     # if transition_mode == 2:
     #     transition_day = 93
     # if transition_mode == 3:
@@ -98,7 +100,7 @@ if __name__ == "__main__":
     AcceptableTransitionScenario = ['no-measures', 'extend-lockdown',
                                     'open-all', 'open-schools', 'open-shopping',
                                     'open-leisure', 'work50', 'work75',
-                                    'work100', 'dynamic-lockdown', 'periodic-lockdown','uk-forecast','smart-lockdown']
+                                    'work100', 'dynamic-lockdown', 'periodic-lockdown','uk-forecast','smart-lockdown','abbottabad-lockdown']
 
     if transition_scenario not in AcceptableTransitionScenario:
         print("\nError !\n\tThe input transition scenario, %s , is not VALID" %
@@ -118,10 +120,13 @@ if __name__ == "__main__":
     if args.generic_outfile:
       outfile = "{}/out.csv".format(output_dir)
 
-    end_time = 365
+
     if transition_scenario in ["extend-lockdown","dynamic-lockdown","periodic-lockdown","uk-forecast"]:
         end_time = 253 #starting from 29th Feb till 8th Nov
       # end_time = 730
+    elif transition_scenario in ['smart-lockdown','abbottabad-lockdown']:
+        end_time = 365
+    end_time = 365 # for a full year
 
     print("Running basic Covid-19 simulation kernel.")
     print("scenario = %s" % (location))
@@ -145,7 +150,7 @@ if __name__ == "__main__":
 
     building_file = "{}/{}_buildings.csv".format(data_dir, location)
     print("Reading Regions.....")
-    regions = read_poly.readPolyFiles("poly_files")
+    regions = read_poly.readPolyFiles("{}_poly_files".format(location))
     e.set_regions(regions)
     print("Total Regions read: " + str(len(regions)))
     print("Regions are " + str(list(regions.keys())))
@@ -172,18 +177,23 @@ if __name__ == "__main__":
     #                              date_format="%m/%d/%Y")
 
     starting_num_infections = 500
-    if args.starting_infections:
-      starting_num_infections = int(args.starting_infections)
     if location == "test":
       starting_num_infections = 10
     if location == "i8":
         starting_num_infections = 10
+    if location == "abbottabad":
+        starting_num_infections = 10
+    if location == "islamabad":
+        starting_num_infections = 20
+    if args.starting_infections:
+      starting_num_infections = int(args.starting_infections)
 
     for i in range(0,10):
       e.add_infections(int(starting_num_infections/10), i-19)
+    # e.add_infections(1, -9)
+    # e.add_infections(1, -8)
 
     print("THIS SIMULATIONS HAS {} AGENTS.".format(e.num_agents))
-    begin_time = datetime.datetime.now()
     e.time = -20
     e.print_header(outfile)
     for i in range(0, 20):
@@ -203,6 +213,7 @@ if __name__ == "__main__":
         if t == transition_day:
             if transition_scenario == "extend-lockdown":
                 pass
+                # measures.full_lockdown(e)
             elif transition_scenario == "open-all":
                 e.remove_all_measures()
             elif transition_scenario == "open-schools":
@@ -229,9 +240,12 @@ if __name__ == "__main__":
         if transition_scenario in ["uk-forecast"]:
             measures.uk_lockdown_forecast(e, t, transition_mode)
         if transition_scenario in ["smart-lockdown"]:
-            measures.smart_lockdown_hard(e,t)
+            measures.smart_lockdown_hard_islamabad(e,t)
+        if transition_scenario in ["abbottabad-lockdown"]:
+            measures.abbottabad_lockdown(e,t)
         elif transition_scenario not in ["no-measures"]:
-            measures.uk_lockdown_existing(e, t, track_trace_limit=track_trace_limit)
+            pass
+            # measures.uk_lockdown_existing(e, t, track_trace_limit=track_trace_limit)
 
         # Propagate the model by one time step.
         print(str(t))

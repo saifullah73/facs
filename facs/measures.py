@@ -13,6 +13,31 @@ def full_lockdown(e):
   #remove later
   # e.track_trace_multiplier = 0.8
 
+
+def abbottabad_lockdown(e,t):
+  e.hospital_protection_factor = 0.4
+  e.track_trace_multiplier = 0.5
+  if t == 16:  # 13th March
+    # school underlockdown, first major response to covid
+    e.remove_all_measures()
+    e.add_closure("school", 0)
+    e.add_case_isolation()
+    e.add_household_isolation()
+  if t == 27: #24th March
+    full_lockdown(e)
+  if t ==73 :# remove full lockdown enacted on 24th March
+    work50(e)
+  if t == 95: # pakistan ramps up testing
+    e.hospital_protection_factor = 0.2
+  if t == 112:
+    e.add_region_under_lockdown("Kehal", 1, 14)
+    e.add_region_under_lockdown("PMA.Kakul",1,14)
+    e.add_region_under_lockdown("Jhangi.Syedan",1,14)
+  if t == 202: # 15th September
+    work75(e) # #school reopen
+  if t == 274:
+    e.add_closure("school", 0) # schools closed on november 24th
+
 def automatic_smart_lockdown(e,t,threshold,days = 7):
   for region,cases in e.cases_in_regions_today.items():
     if cases >= threshold:
@@ -21,15 +46,18 @@ def automatic_smart_lockdown(e,t,threshold,days = 7):
       e.add_region_under_lockdown(region,1,days)
 
 
-
 # First case recorded in Pakistan on Feburary 26th, and we start our simulation from here (20 days for warmup are performed prior)
-def smart_lockdown_hard(e,t):
+def smart_lockdown_hard_islamabad(e,t):
+  e.hospital_protection_factor = 0.4
+  e.track_trace_multiplier = 0.5
   if t == 16: # 13th March
     #school underlockdown, first major response to covid
     e.remove_all_measures()
     e.add_closure("school", 0)
     e.add_case_isolation()
     e.add_household_isolation()
+  if t == 27: #24th March
+    full_lockdown(e)
   if t == 35: # 1st April
     #I8 under lockdown for a week
     e.add_region_under_lockdown("I8.1",1,7)
@@ -47,10 +75,10 @@ def smart_lockdown_hard(e,t):
     e.add_region_under_lockdown("G9.3", 1, 7)
     e.add_region_under_lockdown("G9.4", 1, 7)
     e.add_region_under_lockdown("G9.Markaz", 1, 7)
-  if t == 73: #9th May
-    full_lockdown(e)
-  if t == 103: # remove full lockdown enacted on 9th May
+  if t ==73 :# remove full lockdown enacted on 24th March
     work50(e)
+  if t == 95: # pakistan ramps up testing
+    e.hospital_protection_factor = 0.2
   if t == 111: # 16th June
     # I8 under lockdown for a week
     e.add_region_under_lockdown("I8.1", 1, 7)
@@ -87,6 +115,7 @@ def smart_lockdown_hard(e,t):
     e.add_region_under_lockdown("GhauriTown.Phase4A", 1, 7)
     e.add_region_under_lockdown("GhauriTown.Phase5", 1, 7)
   if t == 202: # 15th September
+    work75(e) # school reopen
     pass # ripah medical college under lockdown
   if t == 226: # 9th Oct
     e.add_region_under_lockdown("G10.4", 0.5, 7)
@@ -114,6 +143,8 @@ def smart_lockdown_hard(e,t):
     e.add_region_under_lockdown("I8.4", 1, 7)
     e.add_region_under_lockdown("G10.4",1,7)
     e.add_region_under_lockdown("G6.2",1,7)
+  if t == 274:
+    e.add_closure("school", 0) # schools closed on november 24th
 
 
 '''

@@ -15,8 +15,8 @@ def full_lockdown(e):
 
 
 def abbottabad_lockdown(e,t):
-  e.hospital_protection_factor = 0.8
-  e.track_trace_multiplier = 0.8
+  e.hospital_protection_factor = 0.4
+  e.track_trace_multiplier = 0.5
   if t == 16:  # 13th March
     # school underlockdown, first major response to covid
     e.remove_all_measures()
@@ -28,7 +28,7 @@ def abbottabad_lockdown(e,t):
   if t ==73 :# remove full lockdown enacted on 24th March
     work50(e)
   if t == 95: # pakistan ramps up testing
-    e.hospital_protection_factor = 0.4
+    e.hospital_protection_factor = 0.2
   if t == 112:
     e.add_region_under_lockdown("Kehal", 1, 14)
     e.add_region_under_lockdown("PMA.Kakul",1,14)

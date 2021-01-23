@@ -9,6 +9,12 @@ To run a simple simulation of a basic test dataset, type:
 To run a simulation of the Borough of Brent, type:
 `python3 run.py --location=brent --transition_scenario=extend-lockdown --transition_mode=1 --output_dir=.`
 
+To run a simulation of the Islamabad, type:
+`python3 run.py --location=islamabad --transition_scenario=smart-lockdown --transition_mode=1 --output_dir=output`  
+
+To run a simulation of the Abbottabad, type:
+`python3 run.py --location=abbottabad --transition_scenario=abbottabad-lockdown --transition_mode=1 --output_dir=output`
+
 To run a simulation of Brunel University London, type:
 `python3 run_campus.py --location=brunel --transition_scenario=extend-lockdown --transition_mode=1 --output_dir=.`
 

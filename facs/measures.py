@@ -15,27 +15,55 @@ def full_lockdown(e):
 
 
 def abbottabad_lockdown(e,t):
+  # e.hospital_protection_factor = 0.4
+  # e.track_trace_multiplier = 0.8
+  # if t == 16:  # 13th March
+  #   # school underlockdown, first major response to covid
+  #   e.remove_all_measures()
+  #   e.add_closure("school", 0)
+  #   e.add_case_isolation()
+  #   e.add_household_isolation()
+  # if t == 27: #24th March
+  #   work50(e)
+  # if t ==73:# remove full lockdown enacted on 24th March
+  #   work75(e)
+  # if t == 95: # pakistan ramps up testing
+  #   e.hospital_protection_factor = 0.2
+  #   e.track_trace_multiplier = 0.5
+  # if t == 112:
+  #   e.add_region_under_lockdown("Kehal", 1, 14)
+  #   e.add_region_under_lockdown("PMA.Kakul",1,14)
+  #   e.add_region_under_lockdown("Jhangi.Syedan",1,14)
+  # if t == 202: # 15th September
+  #   work100(e) # #school reopen
+  # if t == 274:
+  #   e.add_closure("school", 0) # schools closed on november 24th
+
+  # track_trace_multiplier was 0.8
+
+  constant = 13
   e.hospital_protection_factor = 0.4
-  e.track_trace_multiplier = 0.5
-  if t == 16:  # 13th March
+  e.track_trace_multiplier = 0.8
+  if t == (16-constant):  # 13th March
     # school underlockdown, first major response to covid
     e.remove_all_measures()
     e.add_closure("school", 0)
     e.add_case_isolation()
     e.add_household_isolation()
-  if t == 27: #24th March
-    full_lockdown(e)
-  if t ==73 :# remove full lockdown enacted on 24th March
+  if t == (27-constant): #24th March
     work50(e)
-  if t == 95: # pakistan ramps up testing
+  if t == (73-constant):# remove full lockdown enacted on 24th March
+    work75(e)
+  if t == (95 - constant): # pakistan ramps up testing
     e.hospital_protection_factor = 0.2
-  if t == 112:
+    e.track_trace_multiplier = 0.5
+  if t == (112 - constant):
     e.add_region_under_lockdown("Kehal", 1, 14)
     e.add_region_under_lockdown("PMA.Kakul",1,14)
     e.add_region_under_lockdown("Jhangi.Syedan",1,14)
-  if t == 202: # 15th September
-    work75(e) # #school reopen
-  if t == 274:
+  if t == (202 - constant): # 15th September
+    work100(e) # #school reopen
+  if t == (274 - constant):
     e.add_closure("school", 0) # schools closed on november 24th
 
 def automatic_smart_lockdown(e,t,threshold,days = 7):

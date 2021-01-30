@@ -22,10 +22,6 @@ class Needs():
         self.household_isolation_multiplier = 1.0  # written by owais and saif, describes isolation of family memebers of infected person
         print("Needs created. Household isolation multiplier set to {}.".format(self.household_isolation_multiplier))
 
-    # def i(self, name):
-    #     for k, e in enumerate(self.labels):
-    #         if e == name:
-    #             return k
 
     def add_needs(self, csvfile=""):
         if csvfile == "":
@@ -93,11 +89,10 @@ class Needs():
                     n[lids["park"]] = n[lids["park"]] * needs_reduction_factor
                     n[lids["hospital"]] = n[lids["hospital"]] * needs_reduction_factor
                     n[lids["leisure"]] = n[lids["leisure"]] * needs_reduction_factor
-                    n[lids["shopping"]] = n[lids["shopping"]] * needs_reduction_factor
-                    n[lids["supermarket"]] = max(n[lids["supermarket"]] * needs_reduction_factor,
-                                                 20)  # people still go to supermarkets atleast 20 min per day
+                    n[lids["shopping"]] = max(n[lids["shopping"]] * needs_reduction_factor,60) # people still go to grocerry shopping atleast 60 min per week
+                    n[lids["supermarket"]] = n[lids["supermarket"]] * needs_reduction_factor
                     n[lids["place_of_worship"]] = max(n[lids["place_of_worship"]] * needs_reduction_factor,
-                                                      40)  # people still go for prayers atleast 40 min per day
+                                                      280)  # people still go for prayers atleast 280 min per week
                     return n
 
             if person.work_from_home:
@@ -106,7 +101,7 @@ class Needs():
                 n[lids["school"]] = 0
             return n
         else:
-            return np.array([0, 720, 0, 0, 0, 0, 0, 0])
+            return np.array([0, 5040, 0, 0, 0, 0, 0, 0])
 
 
 # Global storage for needs now, to keep it simple.
@@ -474,27 +469,20 @@ class Location:
         if person.status == "dead":
             return
         if person.status == "infectious":
-            visit_time *= e.self_isolation_multiplier  # implementing case isolation (CI)
-        elif person.household.is_infected():  # person is in household quarantine, but not subject to CI.
-            visit_time *= needs.household_isolation_multiplier
-        '''
-        Explaination: Why some location types has need in terms of minutes per week
-        '''
+          visit_time *= e.self_isolation_multiplier # implementing case isolation (CI)
+        elif person.household.is_infected(): # person is in household quarantine, but not subject to CI.
+          visit_time *= needs.household_isolation_multiplier
+
         if person.hospitalised and self.type == "hospital":
-            # self.inf_visit_minutes += need/7 * e.hospital_protection_factor
-            self.inf_visit_minutes += need * e.hospital_protection_factor
-            return
+          self.inf_visit_minutes += need/7 * e.hospital_protection_factor
+          return
 
         if visit_time > 0.0:
-            '''
-            need is per day, and visit time is being multiplied by 7, why?
-            '''
-            # visit_probability = need/(visit_time * 7) # = minutes per week / (average visit time * days in the week)
-            visit_probability = need / (visit_time)
-            # if ultraverbose:
-            #  print("visit prob = ", visit_probability)
+          visit_probability = need/(visit_time * 7) # = minutes per week / (average visit time * days in the week)
+          #if ultraverbose:
+          #  print("visit prob = ", visit_probability)
         else:
-            return
+          return
 
         if deterministic:
             self.visit_probability_counter += min(visit_probability, 1)

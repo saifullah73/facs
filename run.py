@@ -245,6 +245,7 @@ if __name__ == "__main__":
             measures.smart_lockdown_hard_islamabad(e,t)
         if transition_scenario in ["abbottabad-lockdown"]:
             measures.template_abbottabad(e,t)
+            # measures.abbottabad_lockdown(e,t)
         elif transition_scenario not in ["no-measures"]:
             pass
             # measures.uk_lockdown_existing(e, t, track_trace_limit=track_trace_limit)

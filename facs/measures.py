@@ -13,6 +13,27 @@ def full_lockdown(e):
   #remove later
   # e.track_trace_multiplier = 0.8
 
+def template_abbottabad(e,t):
+  constant = 13
+  e.hospital_protection_factor = 0.4
+  e.track_trace_multiplier = 0.8
+  # if t == (16 - constant):  # 13th March
+  #   # school underlockdown, first major response to covid
+  #   e.remove_all_measures()
+  #   e.add_closure("school", 0)
+  #   e.add_case_isolation()
+  #   e.add_household_isolation()
+  if t == (27 - constant):  # 24th March
+    work75(e)
+  # if t == (73 - constant):  # remove full lockdown enacted on 24th March
+  #   work75(e)
+  if t == (95 - constant):  # pakistan ramps up testing
+    e.hospital_protection_factor = 0.2
+    e.track_trace_multiplier = 0.8
+  # if t == (202 - constant):  # 15th September
+  #   work100(e)  # #school reopen
+  # if t == (274 - constant):
+  #   e.add_closure("school", 0)  # schools closed on november 24th
 
 def abbottabad_lockdown(e,t):
   # e.hospital_protection_factor = 0.4

@@ -39,17 +39,15 @@ def abbottabad_lockdown(e,t):
   # if t == 274:
   #   e.add_closure("school", 0) # schools closed on november 24th
 
-  # track_trace_multiplier was 0.8
-
-  constant = 13
+  constant = 4
   e.hospital_protection_factor = 0.4
-  e.track_trace_multiplier = 0.8
+  e.track_trace_multiplier = 0.9
   if t == (16-constant):  # 13th March
     # school underlockdown, first major response to covid
     e.remove_all_measures()
     e.add_closure("school", 0)
-    e.add_case_isolation()
-    e.add_household_isolation()
+    # e.add_case_isolation()
+    # e.add_household_isolation()
   if t == (27-constant): #24th March
     work50(e)
   if t == (73-constant):# remove full lockdown enacted on 24th March

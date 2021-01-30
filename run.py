@@ -84,7 +84,7 @@ if __name__ == "__main__":
     # if transition_mode > 10:
     #     transition_day = transition_mode
 
-    constant = 13
+    constant = 4
     transition_day = -1
     if transition_mode == 1:
         transition_day = (27-constant) #lockdown on 24th March
@@ -191,13 +191,12 @@ if __name__ == "__main__":
 
     for i in range(0,10):
       e.add_infections(int(starting_num_infections/10), i-19)
-    # e.add_infections(1, -9)
-    # e.add_infections(1, -8)
+
 
     print("THIS SIMULATIONS HAS {} AGENTS.".format(e.num_agents))
     e.time = -20
     e.print_header(outfile)
-    for i in range(0, 20):
+    for i in range(0,20):
         e.evolve(reduce_stochasticity=False)
         print(e.time)
         if args.dbg:

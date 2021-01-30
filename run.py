@@ -160,10 +160,12 @@ if __name__ == "__main__":
                                         "{}/building_types_map.yml".format(data_dir),
                                         house_ratio=house_ratio, workspace=12, office_size=1600, household_size=6.45, work_participation_rate=0.5)
 
-    print("Assigning regions to agents.... ")
-    e.assign_region_to_agents()
-    print("Done")
-    e.test_agents_in_regions()
+    # print("Assigning regions to agents.... ")
+    # e.assign_region_to_agents()
+    # print("Done")
+    # e.test_agents_in_regions()
+
+
     # house ratio: number of households per house placed (higher number adds noise, but reduces runtime
     # And then 3 parameters that ONLY affect office placement.
     # workspace: m2 per employee on average. (10 in an office setting, but we use 12 as some people work in more spacious environments)
@@ -242,7 +244,7 @@ if __name__ == "__main__":
         if transition_scenario in ["smart-lockdown"]:
             measures.smart_lockdown_hard_islamabad(e,t)
         if transition_scenario in ["abbottabad-lockdown"]:
-            measures.abbottabad_lockdown(e,t)
+            measures.template_abbottabad(e,t)
         elif transition_scenario not in ["no-measures"]:
             pass
             # measures.uk_lockdown_existing(e, t, track_trace_limit=track_trace_limit)

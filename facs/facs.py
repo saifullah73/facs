@@ -158,7 +158,7 @@ class Person():
         self.symptomatic = False  # may be symptomatic if infectious
         self.status_change_time = -1
         self.age = np.random.choice(91, p=ages)  # age in years p = probability
-        self.region = None  # determines in which location a person house resides
+        self.region = 'unknown'  # determines in which location a person house resides
 
     def assign_region(self, regions):
         '''

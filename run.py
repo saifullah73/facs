@@ -84,7 +84,7 @@ if __name__ == "__main__":
     # if transition_mode > 10:
     #     transition_day = transition_mode
 
-    constant = 4
+    constant = 0  # constant of 0 means simulation start on 26th Feb
     transition_day = -1
     if transition_mode == 1:
         transition_day = (27-constant) #lockdown on 24th March

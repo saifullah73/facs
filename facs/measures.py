@@ -14,7 +14,7 @@ def full_lockdown(e):
   # e.track_trace_multiplier = 0.8
 
 def template_abbottabad(e,t):
-  constant = 13
+  constant = 0
   e.hospital_protection_factor = 0.4
   e.track_trace_multiplier = 0.8
   # if t == (16 - constant):  # 13th March

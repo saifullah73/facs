@@ -105,7 +105,7 @@ class Needs():
 
 
 # Global storage for needs now, to keep it simple.
-needs = Needs("covid_data/needs.csv")
+needs = Needs("D:/data/owais/university/FYP/islamabad branch/owais branch/covid_data/needs.csv")
 num_infections_today = 0
 num_hospitalisations_today = 0
 num_deaths_today = 0

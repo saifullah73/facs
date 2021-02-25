@@ -100,7 +100,7 @@ if __name__ == "__main__":
     #                                    transition_scenario,
     #                                    transition_day)
 
-    outfile = 'output.csv'
+    outfile = 'output/output.csv'
 
     if args.generic_outfile:
       outfile = "{}/out.csv".format(output_dir)

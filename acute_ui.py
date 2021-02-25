@@ -75,7 +75,7 @@ class AcuteUI:
     def sim_len_entry_callback(self):
         try:
             i = int(self.sim_len_str_var.get())
-            if 1 <= i <= 365:
+            if 30 <= i <= 365:
                 self.sim_len_scale.set(i)
             else:
                 self.sim_len_entry.delete(0, "end")
@@ -274,7 +274,7 @@ class AcuteUI:
 
         self.sim_len_int_var.set(365)
 
-        self.sim_len_scale = ttk.Scale(self.bottom_frame, from_=1, to=365, variable=self.sim_len_int_var,
+        self.sim_len_scale = ttk.Scale(self.bottom_frame, from_=30, to=365, variable=self.sim_len_int_var,
                                        command=self.sim_len_scale_callback,
                                        style="My.Horizontal.TScale", value=365)
         self.sim_len_scale.place(x=285, y=292, width=295)

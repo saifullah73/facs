@@ -55,7 +55,7 @@ def run_simulation(queue, running, location="Islamabad", transition_scenario="ex
     # ci_multiplier = float(args.ci_multiplier)
     ci_multiplier = float(ci_multiplier)
     # transition_scenario = args.transition_scenario.lower()
-    transition_mode = "1"
+    transition_mode = 1
     # output_dir = args.output_dir
     output_dir = "output"
     data_dir = "covid_data"
@@ -115,7 +115,7 @@ def run_simulation(queue, running, location="Islamabad", transition_scenario="ex
     #                                    transition_scenario,
     #                                    transition_day)
 
-    outfile = 'output.csv'
+    outfile = 'output/output.csv'
 
     # if args.generic_outfile:
     #     outfile = "{}/out.csv".format(output_dir)
